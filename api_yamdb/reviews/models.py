@@ -1,8 +1,9 @@
+from enum import Enum
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
-class Role(models.TextChoices):
+class Role(Enum):
     """Права доступа для пользователей."""
     pass
 
