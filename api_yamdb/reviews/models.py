@@ -2,15 +2,39 @@ from enum import Enum
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
-# Create your models here.
-class Role(Enum):
-    """Права доступа для пользователей."""
-    pass
+
+#class Role(models.TextChoices):
+#    """Права доступа для пользователей."""
+#    USER = 'user'
+#    MODERATOR = 'moderator'
+#    ADMIN = 'admin'
+
+    
 
 
 class User(AbstractUser):
     """Модель пользователя."""
-    pass
+    id = None
+    roles = (
+        ('USER', 'user'),
+        ('MODERATOR', 'moderator'),
+        ('ADMIN', 'adminstrator'),
+    )
+    username = models.CharField(
+        max_length=150,
+        unique=True
+    )
+    email = models.EmailField(
+        max_length=254,
+        unique=True,
+        blank=True
+    )
+    bio = models.CharField(max_length=9999)
+    role = models.CharField(
+        max_length=99,
+        choices=roles,
+        default=roles[0]
+    )
 
 
 class Categories(models.Model):
