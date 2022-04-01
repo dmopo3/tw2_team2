@@ -3,6 +3,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 
+from .validators import validate_year
+
 
 # class Role(models.TextChoices):
 #    """Права доступа для пользователей."""
@@ -29,19 +31,50 @@ class User(AbstractUser):
 class Categories(models.Model):
     """Категории произведений (Фильмы, книги и тд)."""
 
-    pass
+    name = models.CharField('Категория', max_length=30)
+    slug = models.SlugField('Слак', max_length=50, unique=True)
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Genres(models.Model):
     """Жанры произведений"""
 
-    pass
+    name = models.CharField('Жанр', max_length=30)
+    slug = models.SlugField('Слак', max_length=50, unique=True)
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Titles(models.Model):
     """Произведения"""
 
-    pass
+    name = models.CharField('Название произведения', max_length=200, db_index=True)
+    year = models.IntegerField(
+        'Дата выхода произведения',
+        validators=[validate_year],
+        blank=True
+    )
+    description = models.TextField('Описание')
+    genre = models.ForeignKey(
+        Genres,
+        on_delete=models.SET_NULL,
+        related_name='titles',
+        blank=True,
+        null=True
+    )
+    category = models.ForeignKey(
+        Categories,
+        on_delete=models.SET_NULL,
+        related_name='titles',
+        blank=True,
+        null=True
+    )
+
+    class Meta:
+        ordering = ['-id']
 
 
 class Reviews(models.Model):
