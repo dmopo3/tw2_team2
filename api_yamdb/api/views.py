@@ -6,9 +6,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 
-from reviews.models import Reviews, User
+from reviews.models import Reviews, Titles, User
 from api_yamdb.settings import EMAIL_FROM
-from tw2_team2.api_yamdb.reviews.models import Titles
 from .serializers import (
     SendEmailSerializer,
     CommentsSerializer,

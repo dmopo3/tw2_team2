@@ -3,12 +3,12 @@ from rest_framework.routers import DefaultRouter
 
 from .views import CommentsViewSet, Registration, ReviewsViewSet, send_token
 
-router = DefaultRouter
+router = DefaultRouter()
 router.register(
     r'titles/(?P<title_id>\d+)/reviews', ReviewsViewSet, basename='reviews'
 )
 router.register(
-    r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
+    r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)' r'/comments',
     CommentsViewSet,
     basename='comments',
 )
