@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 
-from reviews.models import Comments, Reviews, User
+from reviews.models import Reviews, User
 from api_yamdb.settings import EMAIL_FROM
 from tw2_team2.api_yamdb.reviews.models import Titles
 from .serializers import (
@@ -65,7 +65,7 @@ class ReviewsViewSet(viewsets.ModelViewSet):
                 raise serializer.ValidationError('Отзыв уже существует')
 
 
-class CommentViewSet(viewsets.ModelViewSet):
+class CommentsViewSet(viewsets.ModelViewSet):
     """Класс для работы с комментариями."""
 
     serializer_class = CommentsSerializer
