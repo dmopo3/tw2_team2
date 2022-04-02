@@ -1,9 +1,11 @@
 import random
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status, viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 from reviews.models import Reviews, Titles, User
@@ -12,6 +14,7 @@ from .serializers import (
     SendEmailSerializer,
     CommentsSerializer,
     ReviewsSerializer,
+    SendTokenSerializer,
 )
 
 
@@ -24,7 +27,10 @@ class Registration(APIView):
         username = serializer.data['username']
         confirmation_code = random.randint(1111, 9999)
         User.objects.get_or_create(
-            email=email, username=username, confirmation_code=confirmation_code
+            email=email,
+            username=username,
+            confirmation_code=confirmation_code,
+            is_active=False
         )
 
         send_mail(
@@ -37,9 +43,26 @@ class Registration(APIView):
         return Response(status=status.HTTP_200_OK)
 
 
-def send_token(request):
-    pass
+class SendToren(APIView):
 
+    @csrf_exempt
+    def post(self, request):
+        serializer = SendTokenSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        username = serializer.data['username']
+        confirmation_code = serializer.data['confirmation_code']
+        if not User.objects.filter(usermane=username):
+            raise ValueError('Error username')
+
+        user = User.objects.get(username=username)
+        if confirmation_code != user.confirmation_code:
+            raise ValueError('Error code')
+        token = RefreshToken.for_user(user).access_token
+        user.save(is_active=True)
+        return Response(
+            f'token: {str(token)}',
+            status=status.HTTP_200_OK
+        )
 
 class ReviewsViewSet(viewsets.ModelViewSet):
     """Класс для работы с оценками."""
