@@ -11,7 +11,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-
+EMAIL_FROM = 'smtp.gmail.com'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'd.mopo3.68@gmail.com'
+EMAIL_HOST_PASSWORD = 'Rf4742418'
 # Application definition
 
 INSTALLED_APPS = [
@@ -21,6 +24,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework_simplejwt',
     'api.apps.ApiConfig',
     'reviews.apps.ReviewsConfig',
 ]
@@ -84,6 +89,14 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+}
 
 # Internationalization
 

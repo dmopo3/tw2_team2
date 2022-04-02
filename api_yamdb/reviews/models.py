@@ -1,4 +1,3 @@
-from enum import Enum
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -6,17 +5,9 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from .validators import validate_year
 
 
-# class Role(models.TextChoices):
-#    """Права доступа для пользователей."""
-#    USER = 'user'
-#    MODERATOR = 'moderator'
-#    ADMIN = 'admin'
-
-
 class User(AbstractUser):
     """Модель пользователя."""
 
-    id = None
     roles = (
         ('USER', 'user'),
         ('MODERATOR', 'moderator'),
@@ -26,6 +17,7 @@ class User(AbstractUser):
     email = models.EmailField(max_length=254, unique=True, blank=True)
     bio = models.CharField(max_length=9999)
     role = models.CharField(max_length=99, choices=roles, default=roles[0])
+    confirmation_code = models.CharField(max_length=254, default='')
 
 
 class Categories(models.Model):
