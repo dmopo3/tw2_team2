@@ -1,6 +1,6 @@
-from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
 
 from .validators import validate_year
 
@@ -43,11 +43,11 @@ class Genres(models.Model):
 class Titles(models.Model):
     """Произведения"""
 
-    name = models.CharField('Название произведения', max_length=200, db_index=True)
+    name = models.CharField(
+        'Название произведения', max_length=200, db_index=True
+    )
     year = models.IntegerField(
-        'Дата выхода произведения',
-        validators=[validate_year],
-        blank=True
+        'Дата выхода произведения', validators=[validate_year], blank=True
     )
     description = models.TextField('Описание')
     genre = models.ForeignKey(
@@ -55,14 +55,14 @@ class Titles(models.Model):
         on_delete=models.SET_NULL,
         related_name='titles',
         blank=True,
-        null=True
+        null=True,
     )
     category = models.ForeignKey(
         Categories,
         on_delete=models.SET_NULL,
         related_name='titles',
         blank=True,
-        null=True
+        null=True,
     )
 
     class Meta:
@@ -129,7 +129,7 @@ class Comments(models.Model):
         verbose_name='Текст комментария',
     )
     author = models.ForeignKey(
-        User,  # Михаил описывает эту модель
+        User,
         verbose_name='Автор комментария',
         on_delete=models.CASCADE,
         related_name='comments',
