@@ -10,6 +10,11 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from reviews.models import Reviews, Titles, User
 from api_yamdb.settings import EMAIL_FROM
+from .permissions import (
+    IsAdminModeratorOwnerOrReadOnly,
+    IsAdminOrReadOnly,
+    IsAdmin,
+)
 from .serializers import (
     SendEmailSerializer,
     CommentsSerializer,
@@ -30,7 +35,7 @@ class Registration(APIView):
             email=email,
             username=username,
             confirmation_code=confirmation_code,
-            is_active=False
+            is_active=False,
         )
 
         send_mail(
@@ -43,9 +48,8 @@ class Registration(APIView):
         return Response(status=status.HTTP_200_OK)
 
 
-#@csrf_exempt
+# @csrf_exempt
 class SendToren(APIView):
-
     def post(self, request):
         serializer = SendTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -62,16 +66,14 @@ class SendToren(APIView):
         token = RefreshToken.for_user(user).access_token
         user.is_active = True
         user.save()
-        return Response(
-            f'token: {str(token)}',
-            status=status.HTTP_200_OK
-        )
+        return Response(f'token: {str(token)}', status=status.HTTP_200_OK)
+
 
 class ReviewsViewSet(viewsets.ModelViewSet):
     """Класс для работы с оценками."""
 
     serializer_class = ReviewsSerializer
-    # permission_classes
+    permission_classes = [IsAdminModeratorOwnerOrReadOnly]
 
     def get_queryset(self):
         title = get_object_or_404(Titles, pk=self.kwargs.get('title_id'))
@@ -94,7 +96,7 @@ class CommentsViewSet(viewsets.ModelViewSet):
     """Класс для работы с комментариями."""
 
     serializer_class = CommentsSerializer
-    # permission_classes =
+    permission_classes = [IsAdminModeratorOwnerOrReadOnly]
 
     def get_queryset(self):
         review = get_object_or_404(Reviews, pk=self.kwargs.get('review_id'))

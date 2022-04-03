@@ -31,7 +31,7 @@ class Categories(models.Model):
 
 
 class Genres(models.Model):
-    """Жанры произведений"""
+    """Жанры произведений."""
 
     name = models.CharField('Жанр', max_length=30)
     slug = models.SlugField('Слак', max_length=50, unique=True)
@@ -41,7 +41,7 @@ class Genres(models.Model):
 
 
 class Titles(models.Model):
-    """Произведения"""
+    """Произведения."""
 
     name = models.CharField(
         'Название произведения', max_length=200, db_index=True
@@ -70,7 +70,7 @@ class Titles(models.Model):
 
 
 class Reviews(models.Model):
-    """Отзывы на произведения"""
+    """Отзывы на произведения."""
 
     title = models.ForeignKey(
         Titles,
@@ -117,7 +117,7 @@ class Reviews(models.Model):
 
 
 class Comments(models.Model):
-    """Коментарии к отзывам"""
+    """Коментарии к отзывам."""
 
     review = models.ForeignKey(
         Reviews,
