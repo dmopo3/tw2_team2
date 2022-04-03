@@ -43,22 +43,25 @@ class Registration(APIView):
         return Response(status=status.HTTP_200_OK)
 
 
+#@csrf_exempt
 class SendToren(APIView):
 
-    @csrf_exempt
     def post(self, request):
         serializer = SendTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         username = serializer.data['username']
         confirmation_code = serializer.data['confirmation_code']
-        if not User.objects.filter(usermane=username):
-            raise ValueError('Error username')
-
-        user = User.objects.get(username=username)
+        try:
+            user = User.objects.get(
+                username=username,
+            )
+        except User.DoesNotExist:
+            return Response('Error username')
         if confirmation_code != user.confirmation_code:
-            raise ValueError('Error code')
+            return Response('Error code')
         token = RefreshToken.for_user(user).access_token
-        user.save(is_active=True)
+        user.is_active = True
+        user.save()
         return Response(
             f'token: {str(token)}',
             status=status.HTTP_200_OK
