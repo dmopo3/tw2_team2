@@ -21,10 +21,16 @@ from .serializers import (
 class Registration(APIView):
     def post(self, request):
         serializer = SendEmailSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
+        if serializer.is_valid() == False:
+            return Response('Invalid date',
+                            status=status.HTTP_400_BAD_REQUEST)
         email = serializer.data['email']
         username = serializer.data['username']
+        if username == 'me':
+            return Response(
+                'username used',
+                status=status.HTTP_400_BAD_REQUEST
+            )
         confirmation_code = random.randint(1111, 9999)
         User.objects.get_or_create(
             email=email,
@@ -56,9 +62,13 @@ class SendToren(APIView):
                 username=username,
             )
         except User.DoesNotExist:
-            return Response('Error username')
+            return Response(
+                'Error username',
+                status=status.HTTP_404_NOT_FOUND
+            )
         if confirmation_code != user.confirmation_code:
-            return Response('Error code')
+            return Response('Error code',
+                            status=status.HTTP_400_BAD_REQUEST)
         token = RefreshToken.for_user(user).access_token
         user.is_active = True
         user.save()
