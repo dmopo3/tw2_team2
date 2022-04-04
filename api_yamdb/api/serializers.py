@@ -24,10 +24,6 @@ class SendTokenSerializer(serializers.ModelSerializer):
 class ReviewsSerializer(serializers.ModelSerializer):
     """Класс для преобразования данных отзыва."""
 
-    title = serializers.SlugRelatedField(
-        slug_field='name',
-        read_only=True,
-    )
     author = serializers.SlugRelatedField(
         slug_field='username',
         read_only=True,
@@ -55,7 +51,6 @@ class ReviewsSerializer(serializers.ModelSerializer):
 class CommentsSerializer(serializers.ModelSerializer):
     """Класс для преобразования данных комментария."""
 
-    review = serializers.SlugRelatedField(slug_field='text', read_only=True)
     author = serializers.SlugRelatedField(
         slug_field='username', read_only=True
     )
