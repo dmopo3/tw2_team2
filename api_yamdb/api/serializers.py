@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
-from reviews.models import (
-    Comments, Reviews, Titles, User, Categories, Genres)
+from reviews.models import Comments, Reviews, Titles, User, Categories, Genres
 
 
 class SendEmailSerializer(serializers.ModelSerializer):
@@ -78,6 +77,9 @@ class GenresSerializer(serializers.ModelSerializer):
 
 
 class TitlesReadSerializer(serializers.ModelSerializer):
+    rating = serializers.IntegerField(
+        source='reviews__score__avg', read_only=True
+    )
     category = CategoriesSerializer(read_only=True)
     genre = GenresSerializer(many=True, read_only=True)
 
@@ -88,13 +90,10 @@ class TitlesReadSerializer(serializers.ModelSerializer):
 
 class TitlesCreateSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
-        queryset=Categories.objects.all(),
-        slug_field='slug'
+        queryset=Categories.objects.all(), slug_field='slug'
     )
     genre = serializers.SlugRelatedField(
-        queryset=Genres.objects.all(),
-        slug_field='slug',
-        many=True
+        queryset=Genres.objects.all(), slug_field='slug', many=True
     )
 
     class Meta:
