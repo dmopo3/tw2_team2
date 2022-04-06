@@ -61,14 +61,8 @@ class GenresAdmin(admin.ModelAdmin):
 
 class TitlesAdmin(admin.ModelAdmin):
     """Класс для отображения произведений в админке"""
-    list_display = (
-        'pk',
-        'name',
-        'year',
-        'description',
-        'genre',
-        'category'
-    )
+
+    list_display = ('pk', 'name', 'year', 'description', 'category')
     search_fields = ('name',)
     list_filter = ('year', 'category', 'genre')
     empty_value_display = '-пусто-'

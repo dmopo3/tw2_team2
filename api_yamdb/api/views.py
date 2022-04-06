@@ -1,5 +1,6 @@
 import random
 from django.core.mail import send_mail
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from django.views.decorators.csrf import csrf_exempt
@@ -11,7 +12,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.mixins import (
     CreateModelMixin,
     DestroyModelMixin,
-    ListModelMixin
+    ListModelMixin,
 )
 
 from reviews.models import Reviews, Titles, User, Categories, Genres
@@ -34,8 +35,12 @@ from .serializers import (
 from .filters import TitlesFilter
 
 
-class CreateListDestroyViewSet(CreateModelMixin, ListModelMixin, DestroyModelMixin,
-                    viewsets.GenericViewSet):
+class CreateListDestroyViewSet(
+    CreateModelMixin,
+    ListModelMixin,
+    DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
     pass
 
 
@@ -43,14 +48,12 @@ class Registration(APIView):
     def post(self, request):
         serializer = SendEmailSerializer(data=request.data)
         if serializer.is_valid() == False:
-            return Response('Invalid date',
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response('Invalid date', status=status.HTTP_400_BAD_REQUEST)
         email = serializer.data['email']
         username = serializer.data['username']
         if username == 'me':
             return Response(
-                'username used',
-                status=status.HTTP_400_BAD_REQUEST
+                'username used', status=status.HTTP_400_BAD_REQUEST
             )
         confirmation_code = random.randint(1111, 9999)
         User.objects.get_or_create(
@@ -82,13 +85,9 @@ class SendToren(APIView):
                 username=username,
             )
         except User.DoesNotExist:
-            return Response(
-                'Error username',
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return Response('Error username', status=status.HTTP_404_NOT_FOUND)
         if confirmation_code != user.confirmation_code:
-            return Response('Error code',
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response('Error code', status=status.HTTP_400_BAD_REQUEST)
         token = RefreshToken.for_user(user).access_token
         user.is_active = True
         user.save()
@@ -170,7 +169,11 @@ class GenresViewSet(CreateListDestroyViewSet):
 class TitlesViewSet(viewsets.ModelViewSet):
     """Вьюсет для произведений"""
 
-    queryset = Titles.objects.all()
+    queryset = (
+        Titles.objects.all()
+        .annotate(rating=Avg('reviews__score'))
+        .order_by('name')
+    )
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = TitlesFilter
     pagination_class = LimitOffsetPagination
