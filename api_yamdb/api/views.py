@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status, viewsets, filters
+from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -45,6 +46,8 @@ class CreateListDestroyViewSet(
 
 
 class Registration(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         serializer = SendEmailSerializer(data=request.data)
         if serializer.is_valid() == False:
@@ -75,6 +78,8 @@ class Registration(APIView):
 
 # @csrf_exempt
 class SendToren(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         serializer = SendTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
