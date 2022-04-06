@@ -1,7 +1,15 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .views import CommentsViewSet, Registration, ReviewsViewSet, SendToren
+from .views import (
+    CommentsViewSet,
+    CategoriesViewSet,
+    GenresViewSet,
+    TitlesViewSet,
+    Registration,
+    ReviewsViewSet,
+    SendToren
+)
 
 router = DefaultRouter()
 router.register(
@@ -12,6 +20,9 @@ router.register(
     CommentsViewSet,
     basename='comments',
 )
+router.register('categories', CategoriesViewSet)
+router.register('genres', GenresViewSet)
+router.register('titles', TitlesViewSet)
 
 urlpatterns = [
     path('v1/', include(router.urls)),

@@ -19,6 +19,9 @@ class User(AbstractUser):
     role = models.CharField(max_length=99, choices=roles, default=roles[0])
     confirmation_code = models.CharField(max_length=254, default='')
 
+    def __str__(self) -> str:
+        return self.username
+
 
 class Categories(models.Model):
     """Категории произведений (Фильмы, книги и тд)."""
@@ -58,12 +61,10 @@ class Titles(models.Model):
         'Дата выхода произведения', validators=[validate_year], blank=True
     )
     description = models.TextField('Описание')
-    genre = models.ForeignKey(
+    genre = models.ManyToManyField(
         Genres,
-        on_delete=models.SET_NULL,
         related_name='titles',
         blank=True,
-        null=True,
     )
     category = models.ForeignKey(
         Categories,
@@ -72,6 +73,9 @@ class Titles(models.Model):
         blank=True,
         null=True,
     )
+
+    def __str__(self) -> str:
+        return self.name
 
     class Meta:
         verbose_name = 'Произведении'
