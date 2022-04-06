@@ -50,22 +50,20 @@ class Registration(APIView):
 
     def post(self, request):
         serializer = SendEmailSerializer(data=request.data)
-        if serializer.is_valid() == False:
-            return Response('Invalid date', status=status.HTTP_400_BAD_REQUEST)
-        email = serializer.data['email']
-        username = serializer.data['username']
-        if username == 'me':
+        serializer.is_valid(raise_exception=True)
+        if serializer.data['username'] == 'me':
             return Response(
                 'username used', status=status.HTTP_400_BAD_REQUEST
             )
         confirmation_code = random.randint(1111, 9999)
         User.objects.get_or_create(
-            email=email,
-            username=username,
+            email=serializer.data['email'],
+            username=serializer.data['username'],
             confirmation_code=confirmation_code,
             is_active=False,
         )
-
+        
+        email = serializer.data['email']
         send_mail(
             'Welcome to yamdb',
             f'code: {confirmation_code}',
@@ -73,7 +71,7 @@ class Registration(APIView):
             [email],
             fail_silently=True,
         )
-        return Response(status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 # @csrf_exempt
