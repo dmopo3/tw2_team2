@@ -1,14 +1,20 @@
 import random
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework import status, viewsets
+from rest_framework import status, viewsets, filters
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.mixins import (
+    CreateModelMixin,
+    DestroyModelMixin,
+    ListModelMixin
+)
 
-
-from reviews.models import Reviews, Titles, User
+from reviews.models import Reviews, Titles, User, Categories, Genres
 from api_yamdb.settings import EMAIL_FROM
 from .permissions import (
     IsAdminModeratorOwnerOrReadOnly,
@@ -20,7 +26,17 @@ from .serializers import (
     CommentsSerializer,
     ReviewsSerializer,
     SendTokenSerializer,
+    CategoriesSerializer,
+    GenresSerializer,
+    TitlesCreateSerializer,
+    TitlesReadSerializer,
 )
+from .filters import TitlesFilter
+
+
+class CreateListDestroyViewSet(CreateModelMixin, ListModelMixin, DestroyModelMixin,
+                    viewsets.GenericViewSet):
+    pass
 
 
 class Registration(APIView):
@@ -127,3 +143,39 @@ class CommentsViewSet(viewsets.ModelViewSet):
         if self.request.user.is_anonymous:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         serializer.save()
+
+
+class CategoriesViewSet(CreateListDestroyViewSet):
+    """Вьюсет для категории."""
+
+    queryset = Categories.objects.all()
+    serializer_class = CategoriesSerializer
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('=name',)
+    lookup_field = 'slug'
+
+
+class GenresViewSet(CreateListDestroyViewSet):
+    """Вьюсет для жанра."""
+
+    queryset = Genres.objects.all()
+    serializer_class = GenresSerializer
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('=name',)
+    lookup_field = 'slug'
+
+
+class TitlesViewSet(viewsets.ModelViewSet):
+    """Вьюсет для произведений"""
+
+    queryset = Titles.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = TitlesFilter
+    pagination_class = LimitOffsetPagination
+
+    def get_serializer_class(self):
+        if self.request.method == "GET":
+            return TitlesReadSerializer
+        return TitlesCreateSerializer

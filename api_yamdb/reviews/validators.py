@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 
 def validate_year(year):
     """Год не может быть больше текущего."""
-    current_year = datetime.now().year
-    if year > current_year:
+    current_year = datetime.datetime.now()
+    if year > current_year.year:
         raise ValidationError(
-            f'Год указан больше текущего года {current_year}')
+            f'Год указан больше текущего года {current_year.year}')
