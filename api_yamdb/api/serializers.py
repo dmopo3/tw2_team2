@@ -4,6 +4,7 @@ from reviews.models import Comments, Reviews, Titles, User, Categories, Genres
 
 
 class SendEmailSerializer(serializers.ModelSerializer):
+    """Сериализатор для функции регистрации"""
     email = serializers.EmailField(required=True)
     username = serializers.CharField(required=True)
 
@@ -13,12 +14,27 @@ class SendEmailSerializer(serializers.ModelSerializer):
 
 
 class SendTokenSerializer(serializers.ModelSerializer):
+    """Сериализатор для функции предоставления токена."""
     username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
 
     class Meta:
         model = User
         fields = ('username', 'confirmation_code')
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """Сериализатор данных пользователя"""
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'first_name',
+            'last_name',
+            'bio',
+            'email',
+            'role',
+        )
 
 
 class ReviewsSerializer(serializers.ModelSerializer):

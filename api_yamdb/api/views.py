@@ -1,11 +1,13 @@
+from functools import partial
 import random
+
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status, viewsets, filters
-from rest_framework.permissions import AllowAny
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -25,6 +27,7 @@ from .permissions import (
 )
 from .serializers import (
     SendEmailSerializer,
+    UserSerializer,
     CommentsSerializer,
     ReviewsSerializer,
     SendTokenSerializer,
@@ -45,6 +48,38 @@ class CreateListDestroyViewSet(
     pass
 
 
+class UserViewSet(viewsets.ModelViewSet):
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+    permission_classes = [IsAuthenticated, IsAdmin]
+    lookup_field = 'username'
+    filter_backend = (filters.SearchFilter)
+    search_fields = ('username',)
+
+
+
+    @action(methods=['GET', 'PATCH',], detail=False,
+            permission_classes=[IsAuthenticated], url_path='me')
+    def user_profile(self, request):
+        serializer = UserSerializer(request.user)
+        if request.method == 'PATCH':
+            if request.user.role == User.roles[2]:
+                serializer = UserSerializer(
+                    request.user,
+                    data=request.data,
+                    partial=True
+                )
+            else:
+                serializer = UserSerializer(
+                    request.user,
+                    data=request.data,
+                    partial=True
+                )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data)
+
 class Registration(APIView):
     permission_classes = [AllowAny]
 
@@ -62,7 +97,7 @@ class Registration(APIView):
             confirmation_code=confirmation_code,
             is_active=False,
         )
-        
+
         email = serializer.data['email']
         send_mail(
             'Welcome to yamdb',
