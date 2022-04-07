@@ -37,6 +37,21 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
 
+class UserNotAdminSerializer(serializers.ModelSerializer):
+    """Сериализатор данных пользователя"""
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'first_name',
+            'last_name',
+            'bio',
+            'email',
+            'role',
+        )
+        read_only_fields = ('role',)
+
+
 class ReviewsSerializer(serializers.ModelSerializer):
     """Класс для преобразования данных отзыва."""
 

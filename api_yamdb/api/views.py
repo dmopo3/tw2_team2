@@ -1,4 +1,3 @@
-from functools import partial
 import random
 
 from django.core.mail import send_mail
@@ -21,13 +20,17 @@ from rest_framework.mixins import (
 from reviews.models import Reviews, Titles, User, Categories, Genres
 from api_yamdb.settings import EMAIL_FROM
 from .permissions import (
+    AdminOnly,
     IsAdminModeratorOwnerOrReadOnly,
     IsAdminOrReadOnly,
     IsAdmin,
+    AuthorizedOrReadOnly,
+    AdminOrUserOrReadOnly,
 )
 from .serializers import (
     SendEmailSerializer,
     UserSerializer,
+    UserNotAdminSerializer,
     CommentsSerializer,
     ReviewsSerializer,
     SendTokenSerializer,
@@ -51,26 +54,24 @@ class CreateListDestroyViewSet(
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
-    permission_classes = [IsAuthenticated, IsAdmin]
+    permission_classes = (IsAuthenticated, AdminOnly)
     lookup_field = 'username'
     filter_backend = (filters.SearchFilter)
     search_fields = ('username',)
 
-
-
-    @action(methods=['GET', 'PATCH',], detail=False,
+    @action(methods=['GET', 'PATCH'], detail=False,
             permission_classes=[IsAuthenticated], url_path='me')
-    def user_profile(self, request):
+    def get_current_user_info(self, request):
         serializer = UserSerializer(request.user)
         if request.method == 'PATCH':
-            if request.user.role == User.roles[2]:
+            if request.user.role == 'ADMIN':
                 serializer = UserSerializer(
                     request.user,
                     data=request.data,
                     partial=True
                 )
             else:
-                serializer = UserSerializer(
+                serializer = UserNotAdminSerializer(
                     request.user,
                     data=request.data,
                     partial=True
@@ -79,6 +80,7 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.data)
+
 
 class Registration(APIView):
     permission_classes = [AllowAny]
@@ -91,6 +93,10 @@ class Registration(APIView):
                 'username used', status=status.HTTP_400_BAD_REQUEST
             )
         confirmation_code = random.randint(1111, 9999)
+        if User.objects.filter(username=serializer.data['username']).exists():
+            return Response('username used', status=status.HTTP_400_BAD_REQUEST)
+        if User.objects.filter(email=serializer.data['email']).exists():
+            return Response('email used', status=status.HTTP_400_BAD_REQUEST)
         User.objects.get_or_create(
             email=serializer.data['email'],
             username=serializer.data['username'],

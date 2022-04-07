@@ -9,15 +9,17 @@ class User(AbstractUser):
     """Модель пользователя."""
 
     roles = (
-        ('USER', 'user'),
-        ('MODERATOR', 'moderator'),
-        ('ADMIN', 'adminstrator'),
+        ('user', 'user'),
+        ('moderator', 'moderator'),
+        ('admin', 'admin'),
     )
     username = models.CharField(max_length=150, unique=True)
-    email = models.EmailField(max_length=254, unique=True, blank=True)
-    bio = models.CharField(max_length=9999)
-    role = models.CharField(max_length=99, choices=roles, default=roles[0])
-    confirmation_code = models.CharField(max_length=254, default='')
+    email = models.EmailField(max_length=254, unique=True)
+    bio = models.TextField(blank=True)
+    role = models.CharField(max_length=99, choices=roles, default='user')
+    confirmation_code = models.CharField(
+        max_length=254, default='XXXX', null=True
+    )
 
     def __str__(self) -> str:
         return self.username
