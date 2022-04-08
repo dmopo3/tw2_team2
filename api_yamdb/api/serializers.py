@@ -5,6 +5,7 @@ from reviews.models import Comments, Reviews, Titles, User, Categories, Genres
 
 class SendEmailSerializer(serializers.ModelSerializer):
     """Сериализатор для функции регистрации"""
+
     email = serializers.EmailField(required=True)
     username = serializers.CharField(required=True)
 
@@ -15,6 +16,7 @@ class SendEmailSerializer(serializers.ModelSerializer):
 
 class SendTokenSerializer(serializers.ModelSerializer):
     """Сериализатор для функции предоставления токена."""
+
     username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
 
@@ -25,6 +27,7 @@ class SendTokenSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     """Сериализатор данных пользователя"""
+
     class Meta:
         model = User
         fields = (
@@ -39,6 +42,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserNotAdminSerializer(serializers.ModelSerializer):
     """Сериализатор данных пользователя"""
+
     class Meta:
         model = User
         fields = (
@@ -56,9 +60,9 @@ class ReviewsSerializer(serializers.ModelSerializer):
     """Класс для преобразования данных отзыва."""
 
     author = serializers.SlugRelatedField(
+        default=serializers.CurrentUserDefault(),
         slug_field='username',
         read_only=True,
-        many=False,
     )
 
     def validate(self, attr):
@@ -66,7 +70,7 @@ class ReviewsSerializer(serializers.ModelSerializer):
         if request.method != 'POST':
             return attr
         author = request.user
-        title_id = request.kwargs.get('title_id')
+        title_id = self.context['view'].kwargs.get('title_id')
         title = get_object_or_404(Titles, pk=title_id)
         if Reviews.objects.filter(title=title, author=author).exists():
             raise serializers.ValidationError(
