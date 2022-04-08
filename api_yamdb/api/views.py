@@ -55,6 +55,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
     permission_classes = (IsAuthenticated, AdminOnly)
+    pagination_class = LimitOffsetPagination
     lookup_field = 'username'
     filter_backend = (filters.SearchFilter)
     search_fields = ('username',)
@@ -84,6 +85,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class Registration(APIView):
     permission_classes = [AllowAny]
+    pagination_class = LimitOffsetPagination
 
     def post(self, request):
         serializer = SendEmailSerializer(data=request.data)
@@ -118,6 +120,7 @@ class Registration(APIView):
 # @csrf_exempt
 class SendToren(APIView):
     permission_classes = [AllowAny]
+    pagination_class = LimitOffsetPagination
 
     def post(self, request):
         serializer = SendTokenSerializer(data=request.data)
@@ -143,6 +146,7 @@ class ReviewsViewSet(viewsets.ModelViewSet):
 
     serializer_class = ReviewsSerializer
     permission_classes = [IsAdminModeratorOwnerOrReadOnly]
+    pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
         title = get_object_or_404(Titles, pk=self.kwargs.get('title_id'))
@@ -166,6 +170,7 @@ class CommentsViewSet(viewsets.ModelViewSet):
 
     serializer_class = CommentsSerializer
     permission_classes = [IsAdminModeratorOwnerOrReadOnly]
+    pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
         review = get_object_or_404(Reviews, pk=self.kwargs.get('review_id'))
@@ -195,6 +200,7 @@ class CategoriesViewSet(CreateListDestroyViewSet):
     serializer_class = CategoriesSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
+    pagination_class = LimitOffsetPagination
     search_fields = ('=name',)
     lookup_field = 'slug'
 
@@ -206,6 +212,7 @@ class GenresViewSet(CreateListDestroyViewSet):
     serializer_class = GenresSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
+    pagination_class = LimitOffsetPagination
     search_fields = ('=name',)
     lookup_field = 'slug'
 
@@ -220,6 +227,7 @@ class TitlesViewSet(viewsets.ModelViewSet):
     )
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = TitlesFilter
+    permission_classes = (IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
 
     def get_serializer_class(self):
