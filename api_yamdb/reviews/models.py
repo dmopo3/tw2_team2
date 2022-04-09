@@ -106,6 +106,8 @@ class Reviews(models.Model):
     score = models.PositiveSmallIntegerField(
         verbose_name='Оценка',
         default=1,
+        blank=False,
+        null=False,
         validators=[
             MinValueValidator(1, 'Минимальное значение 1'),
             MaxValueValidator(10, 'максимальное значение 10'),
@@ -120,7 +122,7 @@ class Reviews(models.Model):
     class Meta:
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
-        ordering = ['pub_date']
+        ordering = ['id']
         constraints = [
             models.UniqueConstraint(
                 fields=['author', 'title'],
