@@ -23,9 +23,6 @@ from .permissions import (
     AdminOnly,
     IsAdminModeratorOwnerOrReadOnly,
     IsAdminOrReadOnly,
-    IsAdmin,
-    AuthorizedOrReadOnly,
-    AdminOrUserOrReadOnly,
 )
 from .serializers import (
     SendEmailSerializer,
@@ -57,25 +54,25 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, AdminOnly)
     pagination_class = LimitOffsetPagination
     lookup_field = 'username'
-    filter_backend = (filters.SearchFilter)
+    filter_backend = filters.SearchFilter
     search_fields = ('username',)
 
-    @action(methods=['GET', 'PATCH'], detail=False,
-            permission_classes=[IsAuthenticated], url_path='me')
+    @action(
+        methods=['GET', 'PATCH'],
+        detail=False,
+        permission_classes=[IsAuthenticated],
+        url_path='me',
+    )
     def get_current_user_info(self, request):
         serializer = UserSerializer(request.user)
         if request.method == 'PATCH':
             if request.user.role == 'ADMIN':
                 serializer = UserSerializer(
-                    request.user,
-                    data=request.data,
-                    partial=True
+                    request.user, data=request.data, partial=True
                 )
             else:
                 serializer = UserNotAdminSerializer(
-                    request.user,
-                    data=request.data,
-                    partial=True
+                    request.user, data=request.data, partial=True
                 )
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -96,7 +93,9 @@ class Registration(APIView):
             )
         confirmation_code = random.randint(1111, 9999)
         if User.objects.filter(username=serializer.data['username']).exists():
-            return Response('username used', status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                'username used', status=status.HTTP_400_BAD_REQUEST
+            )
         if User.objects.filter(email=serializer.data['email']).exists():
             return Response('email used', status=status.HTTP_400_BAD_REQUEST)
         User.objects.get_or_create(
@@ -225,8 +224,8 @@ class TitlesViewSet(viewsets.ModelViewSet):
         .annotate(rating=Avg('reviews__score'))
         .order_by('name')
     )
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = TitlesFilter
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = TitlesFilter
     permission_classes = (IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
 
